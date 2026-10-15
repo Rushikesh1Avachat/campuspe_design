@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,18 +34,39 @@ export function HeroSection({
   onOpenWhatsAppModal,
 }: HeroSectionProps) {
   const [hoveredCard, setHoveredCard] = useState<number | null>(2);
+  const { scrollYProgress } = useScroll();
+  const glowOneY = useTransform(scrollYProgress, [0, 1], [0, 140]);
+  const glowTwoY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const floatingLeftY = useTransform(scrollYProgress, [0, 1], [0, 70]);
+  const floatingRightY = useTransform(scrollYProgress, [0, 1], [0, 90]);
 
   return (
-    <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 hero-gradient-bg">
+    <motion.section
+      className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 hero-gradient-bg"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+    >
       {/* Background radial glow accents */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[600px] w-[600px] rounded-full bg-blue-100/40 blur-3xl" />
-        <div className="absolute top-10 right-1/4 h-[400px] w-[400px] rounded-full bg-indigo-100/30 blur-3xl" />
+        <motion.div
+          className="h-[600px] w-[600px] rounded-full bg-blue-100/40 blur-3xl"
+          style={{ y: glowOneY }}
+        />
+        <motion.div
+          className="absolute top-10 right-1/4 h-[400px] w-[400px] rounded-full bg-indigo-100/30 blur-3xl"
+          style={{ y: glowTwoY }}
+        />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Floating Tag Top: AI-Powered Campus Assistant */}
-        <div className="flex justify-center">
+        <motion.div
+          className="flex justify-center"
+          initial={{ opacity: 0, y: -18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-[#FFF9F3] px-4 py-1.5 shadow-xs transition-transform hover:scale-105 cursor-pointer">
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-[#0070F3]">
               <Bot className="h-4 w-4" />
@@ -53,10 +75,15 @@ export function HeroSection({
               AI-Powered Campus Assistant
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Hero Title and Subtitle */}
-        <div className="mt-6 text-center max-w-4xl mx-auto">
+        <motion.div
+          className="mt-6 text-center max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.15 }}
+        >
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-[68px] lg:leading-[1.12]">
             Connect{" "}
             <span className="text-[#0070F3] drop-shadow-xs">10X</span>{" "}
@@ -67,13 +94,14 @@ export function HeroSection({
           <p className="mt-4 text-base sm:text-xl text-slate-600 font-normal max-w-2xl mx-auto leading-relaxed">
             One platform connecting students, colleges & employers — faster.
           </p>
-        </div>
+        </motion.div>
 
         {/* Center Floating Notification Badges - Responsive grid / positioning */}
         <div className="relative mt-8">
           {/* Floating Pill: WhatsApp Alert (Left on desktop) */}
-          <div
+          <motion.div
             onClick={onOpenWhatsAppModal}
+            style={{ y: floatingLeftY }}
             className="hidden xl:flex absolute -left-2 top-0 z-20 w-72 cursor-pointer flex-col gap-1 rounded-2xl border border-emerald-100 bg-white/95 p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-md transition-all hover:scale-105 hover:shadow-emerald-500/10 animate-float-slow"
           >
             <div className="flex items-center gap-2">
@@ -88,10 +116,13 @@ export function HeroSection({
             <p className="text-[11px] leading-tight text-slate-500">
               Get notified on WhatsApp! You&apos;ll get instant alerts for colleges & jobs directly.
             </p>
-          </div>
+          </motion.div>
 
           {/* Floating Pill: Matched Students (Lower Left on desktop) */}
-          <div className="hidden xl:flex absolute -left-6 top-32 z-20 items-center gap-3 rounded-full border border-blue-100 bg-white/95 px-4 py-2 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-md animate-float-delay">
+          <motion.div
+            style={{ y: floatingLeftY }}
+            className="hidden xl:flex absolute -left-6 top-32 z-20 items-center gap-3 rounded-full border border-blue-100 bg-white/95 px-4 py-2 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-md animate-float-delay"
+          >
             <div className="flex -space-x-2 overflow-hidden">
               <span className="inline-block h-7 w-7 rounded-full bg-blue-500 ring-2 ring-white text-[11px] font-bold text-white flex items-center justify-center">
                 AK
@@ -107,10 +138,13 @@ export function HeroSection({
               <p className="text-xs font-bold text-slate-900 leading-none">142 students matched today</p>
               <p className="text-[10px] text-slate-500 mt-0.5">IIT, BITS, VIT & 40+ more</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Floating Pill: Resume Builder (Right on desktop) */}
-          <div className="hidden xl:flex absolute -right-4 top-2 z-20 w-72 flex-col gap-1 rounded-2xl border border-blue-100 bg-white/95 p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-md transition-all hover:scale-105 animate-float-slow">
+          <motion.div
+            style={{ y: floatingRightY }}
+            className="hidden xl:flex absolute -right-4 top-2 z-20 w-72 flex-col gap-1 rounded-2xl border border-blue-100 bg-white/95 p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-md transition-all hover:scale-105 animate-float-slow"
+          >
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white">
                 <FileText className="h-4 w-4" />
@@ -123,10 +157,13 @@ export function HeroSection({
             <p className="text-[11px] leading-tight text-slate-500">
               Build your resume. Our intuitive builder gives you curated options to get shortlisted faster.
             </p>
-          </div>
+          </motion.div>
 
           {/* Floating Pill: Radiant Recruiter (Lower Right on desktop) */}
-          <div className="hidden xl:flex absolute -right-6 top-36 z-20 items-center gap-3 rounded-2xl border border-slate-100 bg-white/95 px-3.5 py-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-md animate-float-delay">
+          <motion.div
+            style={{ y: floatingRightY }}
+            className="hidden xl:flex absolute -right-6 top-36 z-20 items-center gap-3 rounded-2xl border border-slate-100 bg-white/95 px-3.5 py-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-md animate-float-delay"
+          >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
               <Briefcase className="h-4 w-4" />
             </div>
@@ -137,22 +174,43 @@ export function HeroSection({
               </div>
               <p className="text-[10px] text-slate-500">Verified recruiter • Shortlisted 3 mins ago</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Center Callout: What are you looking for? */}
-          <div className="flex items-center justify-center gap-2 text-center my-6">
+          <motion.div
+            className="flex items-center justify-center gap-2 text-center my-6"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             <Sparkles className="h-5 w-5 text-[#0070F3] animate-pulse" />
             <h2 className="text-xl sm:text-2xl font-bold text-[#0070F3] tracking-tight">
               What are you looking for?
             </h2>
             <Sparkles className="h-5 w-5 text-[#0070F3] animate-pulse" />
-          </div>
+          </motion.div>
 
           {/* 3 Interactive Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.12,
+                },
+              },
+            }}
+          >
             {/* Card 1: College */}
-            <div
+            <motion.div
               onMouseEnter={() => setHoveredCard(1)}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -8, scale: 1.01 }}
+              transition={{ duration: 0.35 }}
               className={`relative flex flex-col justify-between rounded-3xl border bg-white/90 p-6 sm:p-7 backdrop-blur-md transition-all duration-300 ${
                 hoveredCard === 1
                   ? "border-blue-400 shadow-xl shadow-blue-500/10 scale-[1.02]"
@@ -205,11 +263,15 @@ export function HeroSection({
                   <Bell className="h-4 w-4 ml-1 group-hover:rotate-12 transition-transform" />
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 2: I'm Looking for a Job (Featured & Active) */}
-            <div
+            <motion.div
               onMouseEnter={() => setHoveredCard(2)}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -8, scale: 1.01 }}
+              transition={{ duration: 0.35 }}
               className={`relative flex flex-col justify-between rounded-3xl border-2 bg-white p-6 sm:p-7 transition-all duration-300 ${
                 hoveredCard === 2
                   ? "border-[#0070F3] shadow-2xl shadow-blue-500/15 scale-[1.03] ring-4 ring-blue-50"
@@ -285,11 +347,15 @@ export function HeroSection({
                   <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 3: I'm Hiring */}
-            <div
+            <motion.div
               onMouseEnter={() => setHoveredCard(3)}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -8, scale: 1.01 }}
+              transition={{ duration: 0.35 }}
               className={`relative flex flex-col justify-between rounded-3xl border bg-white/90 p-6 sm:p-7 backdrop-blur-md transition-all duration-300 ${
                 hoveredCard === 3
                   ? "border-blue-400 shadow-xl shadow-blue-500/10 scale-[1.02]"
@@ -342,11 +408,16 @@ export function HeroSection({
                   <Bell className="h-4 w-4 ml-1 group-hover:rotate-12 transition-transform" />
                 </Button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Stats Bar Component */}
-          <div className="mt-14 max-w-5xl mx-auto rounded-3xl border border-slate-200/90 bg-white/80 p-5 sm:p-6 shadow-xs backdrop-blur-md">
+          <motion.div
+            className="mt-14 max-w-5xl mx-auto rounded-3xl border border-slate-200/90 bg-white/80 p-5 sm:p-6 shadow-xs backdrop-blur-md"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.35 }}
+          >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-100">
               {/* Stat 1 */}
               <div className="flex items-center gap-3.5 pt-2 md:pt-0">
@@ -392,10 +463,15 @@ export function HeroSection({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Trusted Partners Section */}
-          <div className="mt-14 text-center">
+          <motion.div
+            className="mt-14 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+          >
             <p className="text-xs sm:text-sm font-medium uppercase tracking-wider text-slate-400">
               Trusted by partners across India
             </p>
@@ -448,9 +524,9 @@ export function HeroSection({
                 <span className="text-sm font-bold text-slate-800">Digital India</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

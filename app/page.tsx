@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
@@ -41,6 +42,10 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
   const router = useRouter();
+  const { scrollYProgress } = useScroll();
+  const layeredGlowY = useTransform(scrollYProgress, [0, 1], [0, -180]);
+  const layeredGlowY2 = useTransform(scrollYProgress, [0, 1], [0, 220]);
+  const layeredGlowY3 = useTransform(scrollYProgress, [0, 1], [0, 150]);
 
   useEffect(() => {
     try {
@@ -79,53 +84,115 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#FAFCFF]">
+    <div className="flex min-h-screen flex-col bg-[#FAFCFF] text-slate-900">
+      <motion.div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <motion.div
+          className="absolute left-[-8%] top-[8%] h-[32rem] w-[32rem] rounded-full bg-gradient-to-br from-blue-200/60 via-cyan-100/40 to-transparent blur-3xl"
+          style={{ y: layeredGlowY }}
+        />
+        <motion.div
+          className="absolute right-[-6%] top-[18%] h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-violet-200/50 via-indigo-100/30 to-transparent blur-3xl"
+          style={{ y: layeredGlowY2 }}
+        />
+        <motion.div
+          className="absolute bottom-[8%] left-[20%] h-[26rem] w-[26rem] rounded-full bg-gradient-to-br from-emerald-200/40 via-teal-100/30 to-transparent blur-3xl"
+          style={{ y: layeredGlowY3 }}
+        />
+      </motion.div>
+
       {/* Navigation Bar */}
       <Navbar
         onOpenWaitlist={handleOpenWaitlist}
         onOpenAuth={handleOpenAuth}
       />
 
-      <main className="flex-1">
-        {/* Hero Section */}
-        <HeroSection
-          onJoinWaitlist={handleOpenWaitlist}
-          onExploreJobs={() => handleScrollToSection("opportunity-feed")}
-          onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
-        />
+      <motion.main
+        className="relative flex-1"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.6 }}
+        >
+          <HeroSection
+            onJoinWaitlist={handleOpenWaitlist}
+            onExploreJobs={() => handleScrollToSection("opportunity-feed")}
+            onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
+          />
+        </motion.div>
 
-        {/* Section 01: Opportunity Discovery */}
-        <OpportunityFeedSection
-          onSelectOpportunity={(item) => setSelectedOpportunity(item)}
-          onExploreMore={() => handleScrollToSection("opportunity-feed")}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7 }}
+        >
+          <OpportunityFeedSection
+            onSelectOpportunity={(item) => setSelectedOpportunity(item)}
+            onExploreMore={() => handleScrollToSection("opportunity-feed")}
+          />
+        </motion.div>
 
-        {/* AI Resume Upload Interactive Section */}
-        <ResumeUploadSection />
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7, delay: 0.05 }}
+        >
+          <ResumeUploadSection />
+        </motion.div>
 
-        {/* Section 02: For Colleges */}
-        <ForCollegesSection
-          onListCollege={() => handleOpenWaitlist("college")}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7, delay: 0.08 }}
+        >
+          <ForCollegesSection
+            onListCollege={() => handleOpenWaitlist("college")}
+          />
+        </motion.div>
 
-        {/* Section 03: For Employers */}
-        <ForEmployersSection
-          onPostJob={() => handleOpenWaitlist("employer")}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7, delay: 0.08 }}
+        >
+          <ForEmployersSection
+            onPostJob={() => handleOpenWaitlist("employer")}
+          />
+        </motion.div>
 
-        {/* Mobile App Showcase & Download Banner */}
-        <AppInterfaceSection />
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+        >
+          <AppInterfaceSection />
+        </motion.div>
 
-        {/* Support & Final Call-To-Action bar */}
-        <SupportAndCtaSection
-          onContactSupport={() => setScheduleCallOpen(true)}
-          onScheduleCall={() => setScheduleCallOpen(true)}
-          onExploreColleges={() => handleScrollToSection("colleges")}
-          onFindOpportunities={() => handleScrollToSection("opportunity-feed")}
-          onListCollege={() => handleOpenWaitlist("college")}
-          onPostJob={() => handleOpenWaitlist("employer")}
-        />
-      </main>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.7, delay: 0.12 }}
+        >
+          <SupportAndCtaSection
+            onContactSupport={() => setScheduleCallOpen(true)}
+            onScheduleCall={() => setScheduleCallOpen(true)}
+            onExploreColleges={() => handleScrollToSection("colleges")}
+            onFindOpportunities={() => handleScrollToSection("opportunity-feed")}
+            onListCollege={() => handleOpenWaitlist("college")}
+            onPostJob={() => handleOpenWaitlist("employer")}
+          />
+        </motion.div>
+      </motion.main>
 
       {/* Multi-column Footer */}
       <Footer
