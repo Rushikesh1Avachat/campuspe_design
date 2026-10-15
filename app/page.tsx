@@ -1,69 +1,138 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState } from "react";
+import { Navbar } from "@/components/Navbar";
+import { HeroSection } from "@/components/HeroSection";
+import { OpportunityFeedSection } from "@/components/OpportunityFeedSection";
+import { ResumeUploadSection } from "@/components/ResumeUploadSection";
+import { ForCollegesSection } from "@/components/ForCollegesSection";
+import { ForEmployersSection } from "@/components/ForEmployersSection";
+import { AppInterfaceSection } from "@/components/AppInterfaceSection";
+import { SupportAndCtaSection } from "@/components/SupportAndCtaSection";
+import { Footer } from "@/components/Footer";
+import {
+  WaitlistModal,
+  OpportunityDetailModal,
+  ScheduleCallModal,
+  WhatsAppModal,
+  AuthModal,
+} from "@/components/Modals";
 
 export default function Home() {
+  // Modal states
+  const [waitlistModalOpen, setWaitlistModalOpen] = useState(false);
+  const [waitlistCategory, setWaitlistCategory] = useState<"college" | "employer" | "student" | null>(null);
+
+  const [selectedOpportunity, setSelectedOpportunity] = useState<any | null>(null);
+  const [scheduleCallOpen, setScheduleCallOpen] = useState(false);
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
+
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
+
+  // Handlers
+  const handleOpenWaitlist = (category: "college" | "employer" | "student") => {
+    setWaitlistCategory(category);
+    setWaitlistModalOpen(true);
+  };
+
+  const handleOpenAuth = (mode: "signin" | "signup") => {
+    setAuthMode(mode);
+    setAuthModalOpen(true);
+  };
+
+  const handleScrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="flex min-h-screen flex-col bg-[#FAFCFF]">
+      {/* Navigation Bar */}
+      <Navbar
+        onOpenWaitlist={handleOpenWaitlist}
+        onOpenAuth={handleOpenAuth}
+      />
+
+      <main className="flex-1">
+        {/* Hero Section */}
+        <HeroSection
+          onJoinWaitlist={handleOpenWaitlist}
+          onExploreJobs={() => handleScrollToSection("opportunity-feed")}
+          onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+        {/* Section 01: Opportunity Discovery */}
+        <OpportunityFeedSection
+          onSelectOpportunity={(item) => setSelectedOpportunity(item)}
+          onExploreMore={() => handleScrollToSection("opportunity-feed")}
+        />
+
+        {/* AI Resume Upload Interactive Section */}
+        <ResumeUploadSection />
+
+        {/* Section 02: For Colleges */}
+        <ForCollegesSection
+          onListCollege={() => handleOpenWaitlist("college")}
+        />
+
+        {/* Section 03: For Employers */}
+        <ForEmployersSection
+          onPostJob={() => handleOpenWaitlist("employer")}
+        />
+
+        {/* Mobile App Showcase & Download Banner */}
+        <AppInterfaceSection />
+
+        {/* Support & Final Call-To-Action bar */}
+        <SupportAndCtaSection
+          onContactSupport={() => setScheduleCallOpen(true)}
+          onScheduleCall={() => setScheduleCallOpen(true)}
+          onExploreColleges={() => handleScrollToSection("colleges")}
+          onFindOpportunities={() => handleScrollToSection("opportunity-feed")}
+          onListCollege={() => handleOpenWaitlist("college")}
+          onPostJob={() => handleOpenWaitlist("employer")}
+        />
       </main>
+
+      {/* Multi-column Footer */}
+      <Footer
+        onOpenWaitlist={handleOpenWaitlist}
+        onOpenAuth={handleOpenAuth}
+        onOpenScheduleCall={() => setScheduleCallOpen(true)}
+        onOpenWhatsApp={() => setWhatsAppModalOpen(true)}
+      />
+
+      {/* Interactive Modals */}
+      <WaitlistModal
+        isOpen={waitlistModalOpen}
+        onClose={() => setWaitlistModalOpen(false)}
+        type={waitlistCategory}
+      />
+
+      <OpportunityDetailModal
+        isOpen={Boolean(selectedOpportunity)}
+        onClose={() => setSelectedOpportunity(null)}
+        item={selectedOpportunity}
+      />
+
+      <ScheduleCallModal
+        isOpen={scheduleCallOpen}
+        onClose={() => setScheduleCallOpen(false)}
+      />
+
+      <WhatsAppModal
+        isOpen={whatsAppModalOpen}
+        onClose={() => setWhatsAppModalOpen(false)}
+      />
+
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        mode={authMode}
+      />
     </div>
   );
 }
