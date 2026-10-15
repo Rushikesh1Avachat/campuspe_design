@@ -2,7 +2,7 @@
 
 A modern, responsive website design project built with Next.js and TypeScript. This project focuses on creating a clean, intuitive, and engaging web experience with a structured component architecture and a maintainable development workflow.
 
-**Live Website:** [CampusPe Design](https://campuspe-design-cgjz.vercel.app/)
+**Live Website:** [CampusPe Design] https://campuspe-design-d7y86pto1.vercel.app)
 
 **GitHub Repository:** [Rushikesh1Avachat/campuspe_design](https://github.com/Rushikesh1Avachat/campuspe_design)
 
