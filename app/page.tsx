@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { OpportunityFeedSection } from "@/components/OpportunityFeedSection";
@@ -18,6 +19,15 @@ import {
   AuthModal,
 } from "@/components/Modals";
 
+const SESSION_KEY = "campuspe_session";
+
+type SessionUser = {
+  name: string;
+  username?: string;
+  email: string;
+  role: "student" | "college" | "recruiter";
+};
+
 export default function Home() {
   // Modal states
   const [waitlistModalOpen, setWaitlistModalOpen] = useState(false);
@@ -29,6 +39,19 @@ export default function Home() {
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
+  const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem(SESSION_KEY);
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser) as SessionUser);
+      }
+    } catch {
+      // no-op for localStorage access issues in restricted environments
+    }
+  }, []);
 
   // Handlers
   const handleOpenWaitlist = (category: "college" | "employer" | "student") => {
@@ -39,6 +62,13 @@ export default function Home() {
   const handleOpenAuth = (mode: "signin" | "signup") => {
     setAuthMode(mode);
     setAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = (user: SessionUser) => {
+    setCurrentUser(user);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    setAuthModalOpen(false);
+    router.push("/dashboard");
   };
 
   const handleScrollToSection = (id: string) => {
@@ -132,6 +162,7 @@ export default function Home() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         mode={authMode}
+        onSuccess={handleAuthSuccess}
       />
     </div>
   );

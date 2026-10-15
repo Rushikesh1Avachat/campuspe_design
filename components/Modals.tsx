@@ -455,20 +455,47 @@ export function AuthModal({
   isOpen,
   onClose,
   mode,
+  onSuccess,
 }: {
   isOpen: boolean;
   onClose: () => void;
   mode: "signin" | "signup";
+  onSuccess?: (payload: {
+    name: string;
+    username?: string;
+    email: string;
+    role: "student" | "college" | "recruiter";
+  }) => void;
 }) {
   const [success, setSuccess] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"student" | "college" | "recruiter">("student");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const finalEmail = email.trim();
+    const derivedUsername = finalEmail.split("@")[0] || "campuspeuser";
+    const finalName = mode === "signup" ? name.trim() || "CampusPe User" : finalEmail.split("@")[0] || "CampusPe User";
+
+    onSuccess?.({
+      name: finalName,
+      username: derivedUsername,
+      email: finalEmail,
+      role: selectedRole,
+    });
+
     setSuccess(true);
   };
 
   const handleClose = () => {
     setSuccess(false);
+    setSelectedRole("student");
+    setName("");
+    setEmail("");
+    setPassword("");
     onClose();
   };
 
@@ -489,18 +516,44 @@ export function AuthModal({
         {!success ? (
           <form onSubmit={handleSubmit} className="mt-4 space-y-3">
             {mode === "signup" && (
-              <div>
-                <label className="text-xs font-semibold text-slate-700">Full Name</label>
-                <Input required placeholder="e.g. Rahul Verma" className="mt-1" />
-              </div>
+              <>
+                <div>
+                  <label className="text-xs font-semibold text-slate-700">Full Name</label>
+                  <Input required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rahul Verma" className="mt-1" />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-700">Role</label>
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {[
+                      { id: "student", label: "Student" },
+                      { id: "college", label: "Admin" },
+                      { id: "recruiter", label: "Employer" },
+                    ].map((role) => (
+                      <button
+                        key={role.id}
+                        type="button"
+                        onClick={() => setSelectedRole(role.id as "student" | "college" | "recruiter")}
+                        className={`rounded-full border px-2.5 py-2 text-[11px] font-bold transition-colors ${
+                          selectedRole === role.id
+                            ? "border-blue-200 bg-blue-50 text-blue-700"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                        }`}
+                      >
+                        {role.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
             <div>
               <label className="text-xs font-semibold text-slate-700">Email Address</label>
-              <Input required type="email" placeholder="you@domain.com" className="mt-1" />
+              <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@domain.com" className="mt-1" />
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-700">Password</label>
-              <Input required type="password" placeholder="••••••••" className="mt-1" />
+              <Input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-1" />
             </div>
 
             <div className="pt-2">

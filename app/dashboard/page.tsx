@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   GraduationCap,
   Briefcase,
@@ -274,8 +275,8 @@ function RoleSelector({ onSelect }: { onSelect: (r: RoleType) => void }) {
 }
 
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
-function Sidebar({ role, activeNav, onNav, collapsed }: {
-  role: RoleType; activeNav: string; onNav: (id: string) => void; collapsed: boolean;
+function Sidebar({ role, activeNav, onNav, collapsed, userName }: {
+  role: RoleType; activeNav: string; onNav: (id: string) => void; collapsed: boolean; userName?: string;
 }) {
   const navMap = {
     student:   [
@@ -309,9 +310,9 @@ function Sidebar({ role, activeNav, onNav, collapsed }: {
   };
 
   const nameMap = {
-    student:   { name: "Amit Kumar",        sub: "B.Tech CSE • 8.9 CGPA" },
-    college:   { name: "Victory College",   sub: "NAAC A++ Partner" },
-    recruiter: { name: "Radiant Info Tech", sub: "Verified Employer" },
+    student:   { name: userName || "Amit Kumar", sub: "B.Tech CSE • 8.9 CGPA" },
+    college:   { name: userName || "Victory College", sub: "NAAC A++ Partner" },
+    recruiter: { name: userName || "Radiant Info Tech", sub: "Verified Employer" },
   };
 
   const items = navMap[role];
@@ -372,8 +373,8 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 // ─── Student: Overview ────────────────────────────────────────────────────────
-function StudentOverview({ applications, opportunities, onNav }: {
-  applications: ApplicationItem[]; opportunities: OpportunityItem[]; onNav: (id: string) => void;
+function StudentOverview({ applications, opportunities, onNav, userName }: {
+  applications: ApplicationItem[]; opportunities: OpportunityItem[]; onNav: (id: string) => void; userName?: string;
 }) {
   const statusColor: Record<string, string> = {
     Applied: "bg-slate-100 text-slate-700", Shortlisted: "bg-blue-50 text-blue-700",
@@ -391,7 +392,7 @@ function StudentOverview({ applications, opportunities, onNav }: {
               <Radio className="h-3 w-3 text-amber-300 animate-pulse" />
               AI Profile Active — 12 New Matches Today
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">Welcome back, Amit Kumar 👋</h2>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">Welcome back, {userName || "Rushikesh Avachat"} 👋</h2>
             <p className="mt-1.5 text-sm text-blue-100 max-w-lg">
               Your AI profile scored <strong>94%</strong> match with top companies. You&apos;re in the <strong>Top 5%</strong> of candidates this week.
             </p>
@@ -963,6 +964,8 @@ function RecruiterOverview({ onNav, showToast }: { onNav: (s: string) => void; s
 }
 
 // ─── MAIN PAGE ─────────────────────────────────────────────────────────────────
+const SESSION_KEY = "campuspe_session";
+
 export default function DashboardPage() {
   const [roleSelected, setRoleSelected] = useState(false);
   const [activeRole, setActiveRole] = useState<RoleType>("student");
@@ -972,7 +975,11 @@ export default function DashboardPage() {
   const [filterCategory, setFilterCategory] = useState("All");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ name: string; username?: string; email: string; role: RoleType } | null>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const [applications, setApplications] = useState<ApplicationItem[]>([
     { id: "a1", role: "Frontend Engineer",  company: "Google Cloud Partner",  type: "Full-Time",  status: "Offered",     appliedDate: "3 days ago",  compensation: "₹14–18 LPA",  location: "Bengaluru" },
@@ -990,7 +997,45 @@ export default function DashboardPage() {
     { id: "o6", title: "Campus Ambassador Lead",                 company: "CampusPe Technologies",  category: "Internship", location: "Pan-India",  mode: "Flexible",        stipend: "₹8k/mo + Certs",   matchScore: 95, skills: ["Community Mgmt", "Event Organizing", "Networking"], saved: false, applied: false, description: "Become the face of CampusPe, organizing hackathons and placement workshops.",   posted: "Today" },
   ]);
 
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem(SESSION_KEY);
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser) as { name?: string; username?: string; email?: string; role?: RoleType };
+        const user = {
+          name: parsedUser.name || parsedUser.username || "CampusPe User",
+          username: parsedUser.username || parsedUser.name || "campuspeuser",
+          email: parsedUser.email || "user@campuspe.in",
+          role: parsedUser.role || "student",
+        };
+        setCurrentUser(user);
+        setActiveRole(user.role);
+        setRoleSelected(true);
+      } else {
+        setCurrentUser({
+          name: "Amit Kumar",
+          username: "amitkumar",
+          email: "amit@campuspe.in",
+          role: "student",
+        });
+      }
+    } catch {
+      setCurrentUser({
+        name: "Amit Kumar",
+        username: "amitkumar",
+        email: "amit@campuspe.in",
+        role: "student",
+      });
+    }
+  }, []);
+
   const showToast = (msg: string) => { setToastMessage(msg); setTimeout(() => setToastMessage(null), 4000); };
+
+  const handleLogout = () => {
+    localStorage.removeItem(SESSION_KEY);
+    setCurrentUser(null);
+    router.push("/");
+  };
 
   const handleApply = (opp: OpportunityItem) => {
     if (opp.applied) return;
@@ -1028,7 +1073,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+      const target = e.target as Node;
+      if (notifRef.current && !notifRef.current.contains(target)) setNotifOpen(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) setUserMenuOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -1043,7 +1090,7 @@ export default function DashboardPage() {
 
   const renderContent = () => {
     if (activeRole === "student") {
-      if (activeNav === "overview")    return <StudentOverview applications={applications} opportunities={opportunities} onNav={setActiveNav} />;
+      if (activeNav === "overview")    return <StudentOverview applications={applications} opportunities={opportunities} onNav={setActiveNav} userName={currentUser?.name} />;
       if (activeNav === "tracker")     return <ApplicationTracker applications={applications} />;
       if (activeNav === "resume")      return <ResumeSection showToast={showToast} />;
       if (activeNav === "interviews")  return <InterviewsSection showToast={showToast} />;
@@ -1171,22 +1218,50 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Avatar */}
-            <div className="flex items-center gap-2 pl-1">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-sky-400 text-xs font-black text-white shadow-sm">
-                {activeRole === "student" ? "AK" : activeRole === "college" ? "VC" : "RD"}
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-xs font-black text-slate-900 leading-none">
-                  {activeRole === "student" ? "Amit Kumar" : activeRole === "college" ? "Victory College" : "Radiant HR"}
-                </p>
-                <p className="text-[10px] text-slate-500 mt-0.5">
-                  {activeRole === "student" ? "B.Tech CSE • 8.9 CGPA" : activeRole === "college" ? "NAAC A++ Partner" : "Verified Employer"}
-                </p>
-              </div>
+            {/* User card */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen((prev) => !prev)}
+                className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-slate-50 px-2 py-1.5 shadow-sm transition-colors hover:bg-slate-100"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-sky-400 text-[10px] font-black text-white shadow-sm">
+                  {currentUser ? currentUser.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() : (activeRole === "student" ? "AK" : activeRole === "college" ? "VC" : "RD")}
+                </div>
+                <div className="hidden md:block text-left min-w-0">
+                  <p className="text-[10px] font-black text-slate-900 leading-none truncate max-w-[120px]">
+                    {currentUser?.name || (activeRole === "student" ? "Amit Kumar" : activeRole === "college" ? "Victory College" : "Radiant HR")}
+                  </p>
+                  <p className="text-[9px] text-slate-500 mt-0.5 truncate max-w-[120px]">
+                    {currentUser?.email || (activeRole === "student" ? "amit@campuspe.in" : activeRole === "college" ? "admin@victorycollege.edu" : "hr@radiant.io")}
+                  </p>
+                </div>
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 z-50 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
+                  <div className="border-b border-slate-100 pb-3">
+                    <p className="text-sm font-black text-slate-900">
+                      {currentUser?.name || (activeRole === "student" ? "Amit Kumar" : activeRole === "college" ? "Victory College" : "Radiant HR")}
+                    </p>
+                    <p className="mt-1 text-[11px] text-slate-500 break-all">
+                      {currentUser?.email || (activeRole === "student" ? "amit@campuspe.in" : activeRole === "college" ? "admin@victorycollege.edu" : "hr@radiant.io")}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-bold text-red-600 transition-colors hover:bg-red-100"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
 
-            <Link href="/" className="hidden sm:flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all">
+            <Link href="/" className="hidden sm:flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all">
               <ArrowLeft className="h-3.5 w-3.5" /> Home
             </Link>
           </div>
@@ -1208,7 +1283,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Sidebar */}
-      <Sidebar role={activeRole} activeNav={activeNav} onNav={setActiveNav} collapsed={sidebarCollapsed} />
+      <Sidebar role={activeRole} activeNav={activeNav} onNav={setActiveNav} collapsed={sidebarCollapsed} userName={currentUser?.name} />
 
       {/* Main content */}
       <main className={`transition-all duration-300 ${sw} pt-16 min-h-screen`}>
