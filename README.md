@@ -4,7 +4,7 @@ A static, responsive CampusPe landing page built with **Next.js 16, React 19, Ja
 
 Design: https://www.figma.com/design/Dmx3vPT4wFLqXmeaeTj2HL/Untitled--Copy-?node-id=1-792
 
-Deployment: https://campuspe-landing-abhishek.rajawatsinghabhishek.chatgpt.site
+Deployment: https://fabulous-souffle-04492e.netlify.app
 
 ## Run locally
 
