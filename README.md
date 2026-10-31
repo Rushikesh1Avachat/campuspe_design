@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CampusPe — Figma Landing Page
 
-## Getting Started
+A static, responsive CampusPe landing page built with **Next.js 16, React 19, JavaScript, and CSS**. The page follows the supplied 1440 × 7207 Figma frame and uses the original embedded images, exported SVG icons, and locally bundled fonts.
 
-First, run the development server:
+Design: https://www.figma.com/design/Dmx3vPT4wFLqXmeaeTj2HL/Untitled--Copy-?node-id=1-792
+
+Deployment: https://campuspe-landing-abhishek.rajawatsinghabhishek.chatgpt.site
+
+## Run locally
+
+Requires Node.js 22 or newer.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The production build is exported into `out/`. It can be hosted on any static host, including Netlify, Vercel, or GitHub Pages with the appropriate base path. No API, database, environment variables, or server runtime is needed.
 
-## Learn More
+With pnpm, use `pnpm install --frozen-lockfile`, `pnpm dev`, and `pnpm build`. The included lockfile uses pnpm 11.
 
-To learn more about Next.js, take a look at the following resources:
+## Project structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+app/
+  globals.css       Design tokens, layout, states, and breakpoints
+  layout.js         Metadata and local font imports
+  page.js           Landing-page route
+components/
+  CampusPe.jsx      Page sections and browser interactions
+  ui.jsx            Reusable buttons, badges, icons, and image wrappers
+data/
+  content.js        Repeated cards, opportunities, and footer content
+public/assets/      Original image and vector assets
+next.config.mjs     Next.js static-export configuration
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Implementation
 
-## Deploy on Vercel
+- Mobile-first CSS with breakpoints at 400, 600, 900, 1200, and 1400 pixels.
+- Desktop section heights and container measurements follow the Figma reference.
+- Original images converted to lossless WebP; Figma crop transforms are reproduced in CSS.
+- Original SVG icons remain external assets rather than inline recreations.
+- Inter, Roboto, Lora, Plus Jakarta Sans, and Caveat are bundled locally.
+- Semantic page sections, skip link, visible keyboard focus, labeled controls, native dialogs, and reduced-motion support.
+- Hover and active states on CTAs, cards, navigation, and the app gallery. Pointer movement subtly changes the hero glow.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Static interactions
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Mobile menu opens and closes; navigation scrolls to page sections.
+- Opportunity category filters update the sample feed.
+- Step cards have selectable states.
+- Resume selection supports file picker and drag/drop, validates PDF/DOC/DOCX and the 10MB limit, and shows the selected filename. Files are not uploaded or analyzed.
+- App-gallery dots or hovering over a phone select a screen, which moves into the center. The partner logos loop continuously and the upload badges float gently; reduced-motion preferences turn off these animations.
+- Waitlist, college, employer, and account CTAs open labeled demo forms with native validation. No submission is sent or stored.
+- Opportunity buttons open sample details. Sample listings are copied from the design and are not live vacancies.
+- Support links use the email and telephone supplied in the design.
+- Destinations or official content not supplied by Figma open an explanatory dialog. Store buttons do not guess app-store listings; policy buttons do not invent policy text.
+- The design-supplied Instagram and YouTube URLs are preserved. Other unspecified social destinations show an informational dialog.
+
+## Validation
+
+The October 2026 Figma audit covers every page section at the original 1440px desktop width. Source properties are preserved in `audit/figma-properties.json`; automated expected values live in `tests/figma-text-spec.json` and `tests/figma-layout-spec.json`.
+
+Run the browser checks after installing dependencies:
+
+```sh
+npm install
+npm install --no-save playwright
+npx playwright install chromium
+npm run build
+node tests/figma-audit.mjs
+node tests/motion-check.mjs
+```
+
+The runner starts its own local static server, saves section screenshots and JSON to `audit/latest`, and exits nonzero on failed mapped typography/layout checks, missing images, overflow, broken fragments, interaction failures or browser errors. `CHROMIUM_PATH` and `PLAYWRIGHT_MODULE` can select an existing browser/runtime.
+
+The recorded final run is in `audit/final`. It includes typography and line wrapping, layout bounds, seven responsive widths (1280, 1024, 768, 600, 390, 375, 320), image loading, links, dialogs, filters, upload validation, gallery controls and reduced motion. Original raster assets were also compared with the uploaded Figma image data; see `audit/raster-asset-verification.json`.
+
+Figma live extraction reached the Starter quota. The complete property inventory was decoded from the supplied `.fig` snapshot and cross-checked with the retrieved live section contexts. This is a desktop-source audit, not a pixel-diff certification of every property or a mobile design match. Native emoji/font fallback can vary by OS; only Chromium was tested. SVG-contained text and disabled text paints are explicitly classified separately.
+
+GitHub write access returned HTTP 403. This package contains local corrections; no repository push or deployment was performed.
+
+## Scope
+
+The supplied file contains a desktop frame; smaller layouts are responsive adaptations. The assignment is frontend-only. Authentication, real matching, submissions, job applications, official policy pages, and live app-store destinations are outside this static build.
+
+Design assets and brand names belong to their respective owners and are included for this replication assignment.
+
+Motion update: the opportunity section stays visible. Steps and feed cards settle into place once on entry, filtered results animate into position, and the feed icon gently pulses. Reduced-motion preferences disable these effects. Stable phone elements, deliberate pointer movement and an 850ms interaction lock prevent repeated screen changes during movement.
+
+The resume-matching row now shows a six-second sequential connector/checkmark animation while in view, with continuously visible text and reduced-motion support.
